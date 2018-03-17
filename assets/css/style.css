@@ -1,0 +1,18 @@
+body {
+    background-image: url("../images/8.jpg");
+    background-repeat: no-repeat;
+    background-size: 100%;
+}
+.jumbotron {
+    background-image: url("../images/3.jpg");
+    /* background-size: cover; */
+    background-size: 17%; 
+    background-repeat: no-repeat;
+    background-position: right;
+    color: #ffff00;
+    background-color: #0000ff;
+}
+.textColors {
+    color: #ffff00;
+    background-color: #0000ff;
+}
