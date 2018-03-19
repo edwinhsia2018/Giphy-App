@@ -1,93 +1,65 @@
-$(document).ready(function() {
+//Initial array of giphys
 
-    //variables
-    var questionsArr = ["What does every minion wear on their head?", "How many fingers do minions have?", "What language do minions speak?", "What's a minion's favorite fruit?", "Why are evil minions purple?", "What character helped to inspire minions?", "What chemical turns a minion evil?"];
-    var answersArr = [["Bandanas","Goggles","Hats","Wigs"], ["One","Two","Three","Four"], ["English", "Minionish", "JavaScript","Minionese"], ["Durian","Apples","Bananas","Tomatoes"],["Opposite color spectrum","Color of royalty","Just looks evil and cool","Producer and designer spilled grape juice"],["Smurfs", "Lemmings", "Pokemon", "Jawas"], ["Mutagen PX-41", "Mutagen P-90X","Mutagen T25", "Mutagen Insanity"]];
-    var rightAns = ["Goggles","Three", "Minionese", "Bananas", "Opposite Color Spectrum", "Oompa Loompas","Mutagen PX-41"];
-    var correctAns = 0;
-    var wrongAns = 0;
-    var skippedQuestions = 0;
-    var questionId = 0;
+var topics = ["aragorn", "frodo", "legolas", "gimli", "boromir"];
 
-    //timers
-    var timer = {
-        time: 16,
-        reset: function () {
-            this.time = 15;
-            $("#show-time").html("Time Remaining: " + this.time);
-        },
-        start: function () {
-            counter = setInterval(timer.count, 1000);
-        },
-        stop: function () {
-            clearInterval(counter);
-        },
-        count: function (){
-            timer.time--;
-            $("#show-time").html("Time Remaining: " + timer.time);
-            if (timer.time <= 0) {
-                skippedQuestions++;
-                nextQuestion ();
-        }
-        }
-    }
+renderButtons();
 
-    $("#game-start").html("Click to Start!");
+$(document).on("click", ".giphy-btn", displayGiphy);
 
-    //Start Game
-    $("#game-start").on("click", function(){
-        $("#trivia-question").text(questionsArr[questionId]);
-        $("#answer1").html(answersArr[questionId][0]);
-        $("#answer2").html(answersArr[questionId][1]);
-        $("#answer3").html(answersArr[questionId][2]);
-        $("#answer4").html(answersArr[questionId][3]);
-        timer.start();
-        $(document).on("click", ".btnanswer", function() {
-            var userAnswer = $(this).text().trim();
-            if (userAnswer == rightAns[questionId]) {
-                correctAns++;
-                nextQuestion();
-            }
-            else {
-                wrongAns++;
-                nextQuestion();
-            }
-            });
-        $("#game-start").html("");
-    })
+function displayGiphy() {
+  var giphy = $(this).attr("data-name");
+  var queryURL = "https://api.giphy.com/v1/gifs/search?q=" + giphy + "&api_key=dc6zaTOxFJmzC&limit=10";
 
-    //countdown function that goes to the next problem
-    function nextQuestion () {
-        if (questionId < questionsArr.length) {
-            questionId++;
-            timer.reset ();
-            $("#trivia-question").text(questionsArr[questionId]);
-            $("#answer1").html(answersArr[questionId][0]);
-            $("#answer2").html(answersArr[questionId][1]);
-            $("#answer3").html(answersArr[questionId][2]);
-            $("#answer4").html(answersArr[questionId][3]);
-            $(document).on("click", ".btnanswer", function() {
-                var userAnswer = $(this).text().trim();
-                if (userAnswer == rightAns[questionId]) {
-                    correctAns++;
-                    nextQuestion();
-                }
-                else {
-                    wrongAns++;
-                    nextQuestion();
-                }});
-        }
-        else {
-            timer.stop ();
-            gameOver ();
-        }
-    }
+  //Ajax call to query giphy
+  $.ajax({
+    url: queryURL,
+    method: "GET"
+  })
+  .then(function(response) {
+      var results = response.data;
+      for (var i=0; i < results.length; i++) {
+          var gifDiv = $("<div class='giphy'>");
+          var rating = results[i].rating;
+          var p = $("<p>").text("Rating: " + rating);
+          var giphyImage = $("<img>","<data-still>","<data-animate>","<data-state='still'>","<class>");
+          giphyImage.attr("src", results[i].images.fixed_height_still.url);
+          giphyImage.attr("data-still", results[i].images.fixed_height_still.url);
+          giphyImage.attr("data-animate", results[i].images.fixed_height.url);
+          giphyImage.attr("class", "gif");
+      
+          //Appending the results to the HTML.
+          gifDiv.append(p);
+          gifDiv.append(giphyImage);
+          $("#giphys-appear-here").prepend(gifDiv);
+      }
+    });
+}
+//Function for creating buttons from the search
+function renderButtons() {
+  $("#giphy-buttons").empty();
+  for (var i = 0; i < topics.length; i++) {
+    var a = $("<button>");
+    a.addClass("giphy-btn");
+    a.attr("data-name", topics[i]);
+    a.text(topics[i]);
+    $("#giphy-buttons").append(a);
+  }
+}
+//Adding the search text to the button created
+$(document).on("click", "#add-giphy", function(event) {
+  event.preventDefault();
+  var giphyInput = $("#giphy-input").val().trim();
+  topics.push(giphyInput);
+  renderButtons();
+});
 
-    //Gameover.  Tally and display scores
-    function gameOver (){
-        $("#correct-answers").html("Correct answers: " + correctAns);
-        $("#wrong-answers").html("Wrong answers: " + wrongAns);
-        $("#skipped-questions").html("Skipped questions: " + skippedQuestions);
-        
-    }
+$(document).on("click", ".gif", function() {
+  var state = $(this).attr("data-state");
+  if (state === "still") {
+    $(this).attr("src", $(this).attr("data-animate"));
+    $(this).attr("data-state", "animate");
+  } else {
+    $(this).attr("src", $(this).attr("data-still"));
+    $(this).attr("data-state", "still");
+  }
 });
