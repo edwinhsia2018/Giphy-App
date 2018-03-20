@@ -52,14 +52,3 @@ $(document).on("click", "#add-giphy", function(event) {
   topics.push(giphyInput);
   renderButtons();
 });
-
-$(document).on("click", ".gif", function() {
-  var state = $(this).attr("data-state");
-  if (state === "still") {
-    $(this).attr("src", $(this).attr("data-animate"));
-    $(this).attr("data-state", "animate");
-  } else {
-    $(this).attr("src", $(this).attr("data-still"));
-    $(this).attr("data-state", "still");
-  }
-});
